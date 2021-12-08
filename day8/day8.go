@@ -27,6 +27,13 @@ func SortString(s string) string {
 	sort.Sort(sortRunes(r))
 	return string(r)
 }
+func SortStrings(s []string) []string {
+	sorted := []string{}
+	for _, str := range s {
+		sorted = append(sorted, SortString(str))
+	}
+	return sorted
+}
 
 func Run() {
 	input := Input()
@@ -53,11 +60,7 @@ func Run() {
 
 func DecodeInput(key, value string) int {
 	inputParts := strings.Split(key, " ")
-	sortedParts := []string{}
-	for _, part := range inputParts {
-		sortedParts = append(sortedParts, SortString(part))
-	}
-	inputParts = sortedParts
+	inputParts = SortStrings(inputParts)
 	inputMap := make(map[string]int)
 	reverseMap := make(map[int]string)
 	for _, part := range inputParts {
@@ -81,8 +84,7 @@ func DecodeInput(key, value string) int {
 	for _, part := range inputParts {
 		if _, ok := inputMap[part]; !ok { // only care about things we don't already know
 			if containsAllChars(part, reverseMap[1]) {
-				// cant be 1, 2, 4, 5, 6, 7, 8
-				// so is either 0, 3, 9
+				// is either 0, 3, 9
 				if len(part) == 5 {
 					inputMap[part] = 3
 					reverseMap[3] = part
@@ -123,18 +125,13 @@ func DecodeInput(key, value string) int {
 		}
 	}
 	fmt.Print(inputMap)
-	valueStr := ""
 	valueParts := strings.Split(value, " ")
-	sortedValueParts := []string{}
-	for _, part := range valueParts {
-		sortedValueParts = append(sortedValueParts, SortString(part))
-	}
-	valueParts = sortedValueParts
+	valueParts = SortStrings(valueParts)
+	valueStr := ""
 	fmt.Println(valueParts)
 	for _, part := range valueParts {
-		valueStr = valueStr + strconv.Itoa(inputMap[part])
+		valueStr += strconv.Itoa(inputMap[part])
 	}
-	fmt.Println(valueStr)
 	valueInt, err := strconv.Atoi(valueStr)
 	if err != nil {
 		log.Fatal(err)
