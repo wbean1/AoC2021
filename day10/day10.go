@@ -76,7 +76,7 @@ func findIncomplete(str string) string {
 	}
 	closesNeeded := []rune{}
 	for _, char := range openStack {
-		closesNeeded = append(closesNeeded, correspondingClose[char])
+		closesNeeded = append([]rune{correspondingClose[char]}, closesNeeded...) // ghetto pre-pend
 	}
 	return string(closesNeeded)
 }
