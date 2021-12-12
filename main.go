@@ -8,6 +8,7 @@ import (
 	"github.com/wbean1/AoC/day1"
 	"github.com/wbean1/AoC/day10"
 	"github.com/wbean1/AoC/day11"
+	"github.com/wbean1/AoC/day12"
 	"github.com/wbean1/AoC/day2"
 	"github.com/wbean1/AoC/day3"
 	"github.com/wbean1/AoC/day4"
@@ -31,6 +32,7 @@ func getDays() map[string]func() {
 	days["day9"] = func() { day9.Run() }
 	days["day10"] = func() { day10.Run() }
 	days["day11"] = func() { day11.Run() }
+	days["day12"] = func() { day12.Run() }
 	return days
 }
 
