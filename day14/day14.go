@@ -1,7 +1,6 @@
 package day14
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"strings"
@@ -12,40 +11,56 @@ import (
 func Run() {
 	inserts := Input()
 	polymer := "BSONBHNSSCFPSFOPHKPK"
-	part1Polymer := runPolymerSteps([]byte(polymer), inserts, 10)
-	maxElementCount, minElementCount := findMaxAndMinLetterCount(part1Polymer)
+	pairMapCount := makePairCountMap(polymer)
+	part1Polymer := runPolymerSteps(pairMapCount, inserts, 10)
+	maxElementCount, minElementCount := findMaxAndMinLetterCount(part1Polymer, []byte("K")[0])
 	fmt.Printf("part1: max(%d) - min(%d) = %d\n", maxElementCount, minElementCount, maxElementCount-minElementCount)
-	part2Polymer := runPolymerSteps([]byte(polymer), inserts, 40)
-	maxElementCount, minElementCount = findMaxAndMinLetterCount(part2Polymer)
+	part2Polymer := runPolymerSteps(pairMapCount, inserts, 40)
+	maxElementCount, minElementCount = findMaxAndMinLetterCount(part2Polymer, []byte("K")[0])
 	fmt.Printf("part2: max(%d) - min(%d) = %d\n", maxElementCount, minElementCount, maxElementCount-minElementCount)
 }
 
-func runPolymerSteps(polymer []byte, inserts map[string]byte, numSteps int) string {
-	for i := 1; i <= numSteps; i++ {
-		fmt.Printf("starting step %d with polymer len: %d\n", i, len(polymer))
-		var newPolymer bytes.Buffer
-		for x, currentByte := range polymer[:len(polymer)-1] {
-			nextByte := polymer[x+1]
-			if val, ok := inserts[string([]byte{currentByte, nextByte})]; ok {
-				// there is an insert for this
-				newPolymer.WriteByte(currentByte)
-				newPolymer.WriteByte(val)
-			} else {
-				// there is not an insert for this
-				newPolymer.WriteByte(currentByte)
-			}
-		}
-		newPolymer.WriteByte(polymer[len(polymer)-1])
-		polymer = newPolymer.Bytes()
+func makePairCountMap(str string) map[string]uint64 {
+	m := make(map[string]uint64)
+	for x, _ := range str[:len(str)-1] {
+		pair := string([]byte{str[x], str[x+1]})
+		m[pair]++
 	}
-	return string(polymer)
+	return m
 }
 
-func findMaxAndMinLetterCount(str string) (uint64, uint64) {
-	charMap := make(map[rune]uint64)
-	for _, char := range str {
-		charMap[char]++
+func runPolymerSteps(pairMapCount map[string]uint64, inserts map[string]byte, numSteps int) map[string]uint64 {
+	for i := 1; i <= numSteps; i++ {
+		fmt.Printf("starting step %d\n", i)
+		fmt.Println(pairMapCount)
+		pairMapCount = runPolymerStep(pairMapCount, inserts)
 	}
+	return pairMapCount
+}
+
+func runPolymerStep(pairMapCount map[string]uint64, inserts map[string]byte) map[string]uint64 {
+	newPairMapCount := make(map[string]uint64)
+	for str, count := range pairMapCount {
+		if val, ok := inserts[str]; ok {
+			new1 := []byte{str[0], val}
+			new2 := []byte{val, str[1]}
+			newPairMapCount[string(new1)] += count
+			newPairMapCount[string(new2)] += count
+		} else {
+			newPairMapCount[str] += count
+		}
+	}
+	return newPairMapCount
+}
+
+func findMaxAndMinLetterCount(pairMapCount map[string]uint64, lastLetter byte) (uint64, uint64) {
+	charMap := make(map[byte]uint64)
+
+	for str, count := range pairMapCount {
+		charMap[str[0]] += count
+	}
+	charMap[lastLetter]++
+
 	max := uint64(0)
 	min := uint64(18446744073709551615)
 	for _, count := range charMap {
