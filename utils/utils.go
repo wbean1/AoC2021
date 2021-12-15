@@ -19,3 +19,15 @@ func ParseFileToStrings(f string) []string {
 	}
 	return result
 }
+
+func ParseFileToTwoDIntArray(f string) [][]int {
+	result := ParseFileToStrings(f)
+	m := make([][]int, len(result))
+	for x, line := range result {
+		m[x] = make([]int, len(line))
+		for y, char := range line {
+			m[x][y] = int(char) - 48
+		}
+	}
+	return m
+}
