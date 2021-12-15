@@ -1,11 +1,10 @@
 package day9
 
 import (
-	"bufio"
 	"fmt"
-	"log"
-	"os"
 	"sort"
+
+	"github.com/wbean1/AoC/utils"
 )
 
 type Coord struct {
@@ -13,7 +12,7 @@ type Coord struct {
 }
 
 func Run() {
-	input := Input()
+	input := Input("/Users/wbean/AoC2021/day9/input.txt")
 	lows, lowCoords := findLows(input)
 	sum := 0
 	for _, low := range lows {
@@ -41,7 +40,7 @@ func findBasins(d [][]int, c []Coord) map[Coord][]Coord {
 		if coord.X > 0 {
 			AddPointToBasin(basins, d, coord, Coord{coord.X - 1, coord.Y})
 		}
-		if coord.Y < len(d)-1 {
+		if coord.Y < len(d[0])-1 {
 			AddPointToBasin(basins, d, coord, Coord{coord.X, coord.Y + 1})
 		}
 		if coord.Y > 0 {
@@ -63,7 +62,7 @@ func AddPointToBasin(basins map[Coord][]Coord, d [][]int, basinLow Coord, lookin
 	if lookingAt.X > 0 {
 		AddPointToBasin(basins, d, basinLow, Coord{lookingAt.X - 1, lookingAt.Y})
 	}
-	if lookingAt.Y < len(d)-1 {
+	if lookingAt.Y < len(d[0])-1 {
 		AddPointToBasin(basins, d, basinLow, Coord{lookingAt.X, lookingAt.Y + 1})
 	}
 	if lookingAt.Y > 0 {
@@ -148,29 +147,6 @@ func findLows(d [][]int) ([]int, []Coord) {
 	return lows, lowCoords
 }
 
-func Input() [][]int {
-	lines := parseFile("/Users/wbean/AoC2021/day9/input.txt")
-	input := make([][]int, len(lines))
-	for x, line := range lines {
-		input[x] = make([]int, len(line))
-		for y, char := range line {
-			input[x][y] = int(char) - 48
-		}
-	}
-	return input
-}
-
-func parseFile(f string) []string {
-
-	file, err := os.Open(f)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	result := []string{}
-	for scanner.Scan() {
-		result = append(result, scanner.Text())
-	}
-	return result
+func Input(file string) [][]int {
+	return utils.ParseFileToTwoDIntArray(file)
 }

@@ -1,12 +1,12 @@
 package day10
 
 import (
-	"bufio"
 	"fmt"
 	"log"
-	"os"
 	"sort"
 	"strings"
+
+	"github.com/wbean1/AoC/utils"
 )
 
 type Stack []rune
@@ -36,10 +36,20 @@ func (s *Stack) Pop() (rune, bool) {
 }
 
 func Run() {
-	input := Input()
+	input := Input("/Users/wbean/AoC2021/day10/input.txt")
+	incorrects, incompletes := findIncorrectsAndIncompletes(input)
+	score := scoreIncorrects(incorrects)
+	fmt.Println(incorrects)
+	fmt.Printf("part1: syntax error score: %d\n", score)
+	score = scoreIncompletes(incompletes)
+	fmt.Println(incompletes)
+	fmt.Printf("part2: incompletes middle score: %d\n", score)
+}
+
+func findIncorrectsAndIncompletes(strs []string) ([]rune, []string) {
 	incorrects := []rune{}
 	incompletes := []string{}
-	for _, str := range input {
+	for _, str := range strs {
 		incorrect, hasIncorrect := findIncorrect(str)
 		if hasIncorrect {
 			incorrects = append(incorrects, incorrect)
@@ -47,12 +57,7 @@ func Run() {
 			incompletes = append(incompletes, findIncomplete(str))
 		}
 	}
-	score := scoreIncorrects(incorrects)
-	fmt.Println(incorrects)
-	fmt.Printf("part1: syntax error score: %d\n", score)
-	score = scoreIncompletes(incompletes)
-	fmt.Println(incompletes)
-	fmt.Printf("part2: incompletes middle score: %d\n", score)
+	return incorrects, incompletes
 }
 
 func findIncomplete(str string) string {
@@ -144,20 +149,6 @@ func scoreIncorrects(chars []rune) int {
 	return score
 }
 
-func Input() []string {
-	return parseFile("/Users/wbean/AoC2021/day10/input.txt")
-}
-
-func parseFile(f string) []string {
-	file, err := os.Open(f)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	result := []string{}
-	for scanner.Scan() {
-		result = append(result, scanner.Text())
-	}
-	return result
+func Input(file string) []string {
+	return utils.ParseFileToStrings(file)
 }

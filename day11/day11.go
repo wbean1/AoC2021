@@ -1,22 +1,21 @@
 package day11
 
 import (
-	"bufio"
 	"fmt"
-	"log"
-	"os"
+
+	"github.com/wbean1/AoC/utils"
 )
 
 type OctoState [][]int
 
 func Run() {
-	state := Input()
+	state := Input("/Users/wbean/AoC2021/day11/input.txt")
 	flashCount := 0
 	for i := 1; i <= 100; i++ {
 		flashCount += state.Step()
 	}
 	fmt.Printf("part1: flashed %d times\n", flashCount)
-	state = Input()
+	state = Input("/Users/wbean/AoC2021/day11/input.txt")
 	step := state.stepTilAllFlash()
 	fmt.Printf("part2: all flashed on step %d\n", step)
 }
@@ -174,27 +173,6 @@ func (s *OctoState) Flash(x, y int, alreadyFlashed [][]bool) int {
 	return flashCount
 }
 
-func Input() OctoState {
-	return parseFile("/Users/wbean/AoC2021/day11/input.txt")
-}
-
-func parseFile(f string) [][]int {
-	file, err := os.Open(f)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	result := []string{}
-	for scanner.Scan() {
-		result = append(result, scanner.Text())
-	}
-	m := make([][]int, len(result))
-	for x, line := range result {
-		m[x] = make([]int, len(line))
-		for y, char := range line {
-			m[x][y] = int(char) - 48
-		}
-	}
-	return m
+func Input(file string) OctoState {
+	return utils.ParseFileToTwoDIntArray(file)
 }
