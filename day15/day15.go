@@ -10,9 +10,9 @@ func Run() {
 	input := Input()
 	minLength := findMinPathLength(input)
 	fmt.Printf("part1: min path length is: %d\n", minLength)
-	newInput := expandMap(input)
-	minLength2 := findMinPathLength(newInput)
-	fmt.Printf("part2: min path length is: %d\n", minLength2)
+	expandedInput := expandMap(input)
+	minLength = findMinPathLength(expandedInput)
+	fmt.Printf("part2: min path length is: %d\n", minLength)
 }
 
 func Input() [][]int {
@@ -27,18 +27,12 @@ func expandMap(d [][]int) [][]int {
 
 	for x := 0; x <= len(m)-1; x++ {
 		for y := 0; y <= len(m[x])-1; y++ {
-			dX := x % len(d)
-			dY := y % len(d[0])
-			xBox := x / len(d)
-			yBox := y / len(d)
-			boxAdd := xBox + yBox
-			m[x][y] = d[dX][dY] + boxAdd
+			m[x][y] = d[x%len(d)][y%len(d[0])] + (x / len(d)) + (y / len(d[0]))
 			if m[x][y] > 9 {
 				m[x][y] = m[x][y] % 9
 			}
 		}
 	}
-	fmt.Println(m)
 	return m
 }
 
@@ -93,13 +87,6 @@ func findMinPathLength(d [][]int) int {
 
 func min(a, b int) int {
 	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
 		return a
 	}
 	return b
