@@ -2,7 +2,6 @@ package day18
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
@@ -172,21 +171,21 @@ func TestMagnitude(t *testing.T) {
 	}
 }
 
-var AddTestCases = map[string]string{
-	"[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]+[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]": "[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]",
-}
+// var AddTestCases = map[string]string{
+// 	"[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]+[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]": "[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]",
+// }
 
-func TestAdd(t *testing.T) {
-	for input, expected := range AddTestCases {
-		sfns := strings.Split(input, "+")
-		sfn1 := toSFN(sfns[0], 0, nil)
-		sfn2 := toSFN(sfns[1], 0, nil)
-		sfn := Add(sfn1, sfn2)
-		got := sfn.String()
-		if got != expected {
-			t.Errorf("wrong Sum for %s.  got: %s, expected: %s", input, got, expected)
-		} else {
-			fmt.Printf("yay! Sum for %s.  got: %s, expected: %s\n", input, got, expected)
-		}
-	}
-}
+// func TestAdd(t *testing.T) {
+// 	for input, expected := range AddTestCases {
+// 		sfns := strings.Split(input, "+")
+// 		sfn1 := toSFN(sfns[0], 0, nil)
+// 		sfn2 := toSFN(sfns[1], 0, nil)
+// 		sfn := Add(sfn1, sfn2)
+// 		got := sfn.String()
+// 		if got != expected {
+// 			t.Errorf("wrong Sum for %s.  got: %s, expected: %s", input, got, expected)
+// 		} else {
+// 			fmt.Printf("yay! Sum for %s.  got: %s, expected: %s\n", input, got, expected)
+// 		}
+// 	}
+// }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/wbean1/AoC/utils"
 )
 
@@ -12,20 +13,18 @@ type SFN struct {
 	X, Y, Parent *SFN
 	Value        int
 	Depth        int
+	id           uuid.UUID
 }
 
 func Add(sfn1, sfn2 SFN) SFN {
-	new := SFN{X: &sfn1, Y: &sfn2, Depth: 0}
+	new := SFN{X: &sfn1, Y: &sfn2, Depth: 0, id: uuid.New()}
+	new = toSFN(new.String(), 0, nil)
 	for new.NeedsExploded(0) || new.NeedsSplit() {
 		new = toSFN(new.String(), 0, nil)
 		if new.NeedsExploded(0) {
-			fmt.Printf("before explode: %s\n", new.String())
 			new.Explode()
-			fmt.Printf("after explode: %s\n", new.String())
 		} else {
-			fmt.Printf("before split: %s\n", new.String())
 			new.Split()
-			fmt.Printf("after split: %s\n", new.String())
 		}
 	}
 	return new
@@ -56,7 +55,6 @@ func (sfn *SFN) findSFNtoSplit() (*SFN, bool) {
 func (sfn *SFN) Split() {
 	// find where to split...
 	childToSplit, found := sfn.findSFNtoSplit()
-	fmt.Printf("found sfn to split: %s\n", childToSplit)
 	if !found {
 		log.Fatal("didn't find sfn to split!")
 	}
@@ -79,9 +77,7 @@ func (sfn *SFN) Split() {
 }
 
 func (sfn *SFN) Explode() {
-	// find the SFN with depth == 4
 	depth4sfn, found := sfn.Find(4)
-	fmt.Printf("depth4sfn is %s\n", depth4sfn.String())
 	if !found {
 		log.Fatalf("didn't find depth4 on explode()")
 	}
@@ -103,72 +99,40 @@ func (sfn *SFN) String() string {
 }
 
 func (sfn *SFN) AddToLeft(leftVal int) {
-	movedLeft := false
-	child := sfn
-	var current *SFN
-	if sfn.Parent != nil {
-		current = sfn.Parent
-	} else {
+	if sfn.Parent == nil {
 		return
 	}
-
-	for {
-		fmt.Printf("looking at: %s\n", current.String())
-		if !movedLeft {
-			if current.X != nil && current.X != child {
-				movedLeft = true
-				current = current.X
-				fmt.Println("moved left!")
-			} else if current.Parent != nil {
-				child = current
-				current = current.Parent
-				fmt.Println("moved up!")
-			} else {
-				return
-			}
-		} else if current.Y != nil && *current.Y != *child {
-			current = current.Y
-			fmt.Println("looking right!")
-		} else if current.X != nil {
-			current = current.X
-			fmt.Println("looking left!")
-		} else {
-			fmt.Printf("found value: %d\n", current.Value)
-			current.Value += leftVal
-
-			return
-		}
+	if sfn.Parent.X != nil && sfn.Parent.X != sfn && sfn.Parent.X.id != sfn.id {
+		sfn.Parent.X.AddDownRight(leftVal)
+	} else {
+		sfn.Parent.AddToLeft(leftVal)
 	}
 }
 
 func (sfn *SFN) AddToRight(rightVal int) {
-	movedRight := false
-	child := sfn
-	var current *SFN
-	if sfn.Parent != nil {
-		current = sfn.Parent
-	} else {
+	if sfn.Parent == nil {
 		return
 	}
-	for {
-		if !movedRight {
-			if current.Y != nil && *current.Y != *child {
-				movedRight = true
-				current = current.Y
-			} else if current.Parent != nil {
-				child = current
-				current = current.Parent
-			} else {
-				return
-			}
-		} else if current.X != nil && *current.X != *child {
-			current = current.X
-		} else if current.Y != nil {
-			current = current.Y
-		} else {
-			current.Value += rightVal
-			return
-		}
+	if sfn.Parent.Y != nil && sfn.Parent.Y != sfn && sfn.Parent.Y.id != sfn.id {
+		sfn.Parent.Y.AddDownLeft(rightVal)
+	} else {
+		sfn.Parent.AddToRight(rightVal)
+	}
+}
+
+func (sfn *SFN) AddDownRight(value int) {
+	if sfn.Y != nil {
+		sfn.Y.AddDownRight(value)
+	} else {
+		sfn.Value += value
+	}
+}
+
+func (sfn *SFN) AddDownLeft(value int) {
+	if sfn.X != nil {
+		sfn.X.AddDownLeft(value)
+	} else {
+		sfn.Value += value
 	}
 }
 
@@ -226,7 +190,7 @@ func (sfn *SFN) NeedsSplit() bool {
 }
 
 func Run() {
-	input := Input("/Users/wbean/AoC2021/day18/input.txt")
+	input := Input("c:\\Users\\william\\AoC2021\\day18\\input.txt")
 	sfn := SFN(input[0])
 	for i, line := range input[1:] {
 		sfn2 := SFN(line)
@@ -246,7 +210,7 @@ func Input(file string) []SFN {
 }
 
 func toSFN(s string, depth int, parent *SFN) SFN {
-	creating := &SFN{}
+	creating := &SFN{id: uuid.New()}
 	if s[0] == byte('[') &&
 		s[len(s)-1] == byte(']') {
 		s = s[1 : len(s)-1] // remove first and last char
@@ -275,7 +239,7 @@ func toSFN(s string, depth int, parent *SFN) SFN {
 		if err != nil {
 			log.Fatal(err)
 		}
-		return SFN{Value: value, Depth: depth, Parent: parent}
+		return SFN{Value: value, Depth: depth, Parent: parent, id: uuid.New()}
 	}
 }
 
