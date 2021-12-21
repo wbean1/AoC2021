@@ -31,3 +31,10 @@ func ParseFileToTwoDIntArray(f string) [][]int {
 	}
 	return m
 }
+
+func Max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
