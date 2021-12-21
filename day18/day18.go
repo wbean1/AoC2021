@@ -190,14 +190,26 @@ func (sfn *SFN) NeedsSplit() bool {
 }
 
 func Run() {
-	input := Input("c:\\Users\\william\\AoC2021\\day18\\input.txt")
-	sfn := SFN(input[0])
-	for i, line := range input[1:] {
-		sfn2 := SFN(line)
+	input := Input("/Users/wbean/AoC2021/day18/input.txt")
+	sfn := input[0]
+	for i, sfn2 := range input[1:] {
 		sfn = Add(sfn, sfn2)
 		fmt.Printf("==> %d: %s\n", i, sfn.String())
 	}
 	fmt.Printf("part1: magnitude is: %d\n", sfn.Magnitude())
+	maxMagnitude := 0
+	for x, sfn1 := range input {
+		for y, sfn2 := range input {
+			if x != y {
+				sum := Add(sfn1, sfn2)
+				magnitude := sum.Magnitude()
+				if magnitude > maxMagnitude {
+					maxMagnitude = magnitude
+				}
+			}
+		}
+	}
+	fmt.Printf("part2: maxManitude sum is: %d\n", maxMagnitude)
 }
 
 func Input(file string) []SFN {
