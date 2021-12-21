@@ -10,8 +10,16 @@ import (
 type State struct {
 	player1Position, player2Position int
 	player1Score, player2Score       int
-	dice, numRolls, rollValue        int
+	dice, numRolls                   int
 	turn                             int // 0 = player1's turn, 1 = player2's turn
+}
+
+type DState struct {
+	player1Position, player2Position uint8
+	player1Score, player2Score       uint8
+	rollValue                        uint8
+	universeCount                    uint64
+	turn                             bool // 0 = player1's turn, 1 = player2's turn
 }
 
 func Run() {
@@ -24,26 +32,30 @@ func Run() {
 		log.Fatal(err)
 	}
 	fmt.Printf("part1: losing score * numRolls = %d\n", losingScore*s.numRolls)
-	diracStates := []State{State{player1Position: 1, player2Position: 6}}
+	diracStates := []DState{DState{player1Position: 1, player2Position: 6, universeCount: 1}}
 	diracStatesComplete, diracStatesIncomplete := SplitComplete(diracStates)
+	var p1wins, p2wins uint64
 	for len(diracStatesIncomplete) > 0 {
-		fmt.Printf("completeStates: %d, incompleteStates: %d\n", len(diracStatesComplete), len(diracStatesIncomplete))
+		fmt.Printf("completeStates: %d, incompleteStates: %d\n", p1wins+p2wins, len(diracStatesIncomplete))
 		for _, d := range diracStatesIncomplete {
 			diracStatesComplete = append(diracStatesComplete, TakeDiracTurn(d)...)
 		}
 		diracStatesComplete, diracStatesIncomplete = SplitComplete(diracStatesComplete)
+		player1Wins, player2Wins := CountWins(diracStatesComplete)
+		p1wins += player1Wins
+		p2wins += player2Wins
+		diracStatesComplete = []DState{}
 	}
-	player1Wins, player2Wins := CountWins(diracStatesComplete)
-	fmt.Printf("part2: player1 wins: %d, player2 wins: %d, max: %d\n", player1Wins, player2Wins, utils.Max(player1Wins, player2Wins))
+	fmt.Printf("part2: player1 wins: %d, player2 wins: %d, max: %d\n", p1wins, p2wins, utils.Max64(p1wins, p2wins))
 }
 
-func CountWins(s []State) (int, int) {
-	var p1wins, p2wins int
+func CountWins(s []DState) (uint64, uint64) {
+	var p1wins, p2wins uint64
 	for _, d := range s {
-		if d.player1Score >= 1000 {
-			p1wins++
-		} else if d.player2Score >= 1000 {
-			p2wins++
+		if d.player1Score >= 21 {
+			p1wins += d.universeCount
+		} else if d.player2Score >= 21 {
+			p2wins += d.universeCount
 		} else {
 			log.Fatal("shouldn't get here ever")
 		}
@@ -51,26 +63,33 @@ func CountWins(s []State) (int, int) {
 	return p1wins, p2wins
 }
 
-func TakeDiracTurn(s State) []State {
-	states := []State{}
-	for i := 1; i <= 3; i++ { // roll dice 3 times
-		for j := 1; j <= 3; j++ {
-			for k := 1; k <= 3; k++ {
-				s.rollValue = i + j + k
-				states = append(states, s)
-			}
-		}
+func TakeDiracTurn(s DState) []DState {
+	rollMap := map[uint8]uint64{
+		3: 1,
+		4: 3,
+		5: 6,
+		6: 7,
+		7: 6,
+		8: 3,
+		9: 1,
+	} // map of rollValue to number of universes that get split into this...
+	states := []DState{}
+	for value, count := range rollMap {
+		copy := s
+		copy.rollValue = value
+		copy.universeCount *= count
+		states = append(states, copy)
 	}
-	updatedStates := []State{}
+	updatedStates := []DState{}
 	for _, d := range states {
-		if d.turn == 0 { // player1's turn
+		if d.turn { // player1's turn
 			d.player1Position += d.rollValue
 			d.player1Position = d.player1Position % 10
 			if d.player1Position == 0 {
 				d.player1Position = 10
 			}
 			d.player1Score += d.player1Position
-			d.turn = 1
+			d.turn = false
 		} else { // player2's turn
 			d.player2Position += d.rollValue
 			d.player2Position = d.player2Position % 10
@@ -78,18 +97,18 @@ func TakeDiracTurn(s State) []State {
 				d.player2Position = 10
 			}
 			d.player2Score += d.player2Position
-			d.turn = 0
+			d.turn = true
 		}
 		updatedStates = append(updatedStates, d)
 	}
 	return updatedStates
 }
 
-func SplitComplete(s []State) ([]State, []State) {
-	complete := []State{}
-	incomplete := []State{}
+func SplitComplete(s []DState) ([]DState, []DState) {
+	complete := []DState{}
+	incomplete := []DState{}
 	for _, state := range s {
-		if state.player1Score >= 1000 || state.player2Score >= 1000 {
+		if state.player1Score >= 21 || state.player2Score >= 21 {
 			complete = append(complete, state)
 		} else {
 			incomplete = append(incomplete, state)

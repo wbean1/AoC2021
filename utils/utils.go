@@ -38,3 +38,10 @@ func Max(a, b int) int {
 	}
 	return b
 }
+
+func Max64(a, b uint64) uint64 {
+	if a > b {
+		return a
+	}
+	return b
+}
