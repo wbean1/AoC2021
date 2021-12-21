@@ -82,14 +82,14 @@ func TakeDiracTurn(s DState) []DState {
 	}
 	updatedStates := []DState{}
 	for _, d := range states {
-		if d.turn { // player1's turn
+		if !d.turn { // player1's turn
 			d.player1Position += d.rollValue
 			d.player1Position = d.player1Position % 10
 			if d.player1Position == 0 {
 				d.player1Position = 10
 			}
 			d.player1Score += d.player1Position
-			d.turn = false
+			d.turn = true
 		} else { // player2's turn
 			d.player2Position += d.rollValue
 			d.player2Position = d.player2Position % 10
@@ -97,7 +97,7 @@ func TakeDiracTurn(s DState) []DState {
 				d.player2Position = 10
 			}
 			d.player2Score += d.player2Position
-			d.turn = true
+			d.turn = false
 		}
 		updatedStates = append(updatedStates, d)
 	}
